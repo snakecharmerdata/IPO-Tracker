@@ -1,0 +1,40 @@
+{
+  "saved_at": "2025-09-09T21:47:22.432874",
+  "count": 2,
+  "choices": [
+    {
+      "company": "Klarna Group plc",
+      "symbol": "KLAR",
+      "exp_trade": "9/10/2025 Wednesday",
+      "parsed_trade_datetime": "2025-09-10T09:30:00",
+      "notify_enabled": true,
+      "notify_24h": false,
+      "notify_3h": true,
+      "category": "Unknown",
+      "price_low": "35.00",
+      "price_high": "37.00",
+      "shares_m": "34.3",
+      "est_volume": "$ 1235.2 mil",
+      "lead_managers": "Goldman Sachs & Co/J.P. Morgan/Morgan Stanley/BofA Securities/Citigroup/Deutsche Bank Securities/ Societe Generale/UBS Investment Bank",
+      "scoop_rating": "S/O",
+      "rating_change": "S/O"
+    },
+    {
+      "company": "Texxon Holding",
+      "symbol": "NPT",
+      "exp_trade": "9/15/2025 Week of",
+      "parsed_trade_datetime": "2025-09-15T09:30:00",
+      "notify_enabled": true,
+      "notify_24h": true,
+      "notify_3h": true,
+      "category": "Unknown",
+      "price_low": "4.00",
+      "price_high": "5.00",
+      "shares_m": "2.0",
+      "est_volume": "$ 9.0 mil",
+      "lead_managers": "D. Boral Capital (ex-EF Hutton)",
+      "scoop_rating": "S/O",
+      "rating_change": "S/O"
+    }
+  ]
+}

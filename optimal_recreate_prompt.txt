@@ -1,0 +1,75 @@
+Title: Recreate a Single-File, Cross-Platform IPO Tracker Desktop App (Python)
+
+You are an expert Python developer. Build a single-file desktop app named ipo.py using Python 3.11+ and Tkinter only (no external UI frameworks, no nltk). The app must run on macOS and Windows with identical behavior wherever possible. Use the standard library wherever you can; requests and beautifulsoup4 are allowed. Keep the entire app in one file.
+
+Core features and behavior (implement precisely):
+1) Data source and parsing
+- Fetch: https://www.iposcoop.com/ipo-calendar/
+- Parse the IPO calendar table (BeautifulSoup if available; otherwise show a clear message that parsing requires bs4).
+- Columns: notify bell, company, symbol proposed, lead managers, shares (millions), price low, price high, est. $ volume, expected to trade, SCOOP rating, rating change, category.
+- Categorization: simple keyword-based category inference (no ML/NLP libs) across company name and a brief info snippet (e.g., DuckDuckGo/Wikipedia summary where available, but optional and best-effort).
+
+2) UI (Tkinter)
+- Main window ~1400×730. Top header bar: 
+  - Brand label: "🏙 IPO Tracker" in bold, large (approx 24pt) and blue.
+  - Category Combobox filter, Search Entry, Refresh button.
+  - Buttons: Setup Notifications, Save Choices, Load Choices, Remove Selected, Remove All, Instructions, Test Notify Now, and a Sound checkbox (default ON).
+- Table: ttk.Treeview with the columns; headers clickable to sort asc/desc (except the bell column). Single-click bell toggles notifications for that row; double-click opens a detail dialog.
+- Bottom panel: shows scheduled notifications (actual notify times) as lines with ticker (blue, bold) and date/time (orange). Refresh every ~2s.
+
+3) Scheduling and times
+- Parse "Expected to Trade" robustly. Support: YYYY-MM-DD, MM/DD/YYYY, MM/DD/YY, MONTH DD[, YYYY], DD with inference, and "Week of MONTH DD[, YYYY]". Ignore past dates.
+- Schedule at fixed local times:
+  - 1 day before at 08:00
+  - Same day at 08:00 (only if the IPO date is strictly in the future; if the date is today/past and same-day is chosen, show this warning: "This IPO is current or in the past cannot be saved. IPO save scheduale is for at least 1 day prior.")
+- The scheduler checks every minute and fires any due/overdue items. The app must be running for popups to appear.
+- Persist scheduled reminders to a JSON file with datetimes serialized as ISO strings. On startup, auto-load and auto-start the scheduler if any future notify times exist.
+
+4) In-app popup notifications (instead of OS banners)
+- At scheduled times (and for Test Notify Now), open a centered Tk popup window with:
+  - Title: "IPO Alert: <Company>"
+  - Body: symbol, trade date, category, price range, and a brief message ("<SYMBOL> begins trading in <time>")
+  - OK button to dismiss
+- Bring the app to front even if minimized (deiconify, lift, focus). 
+- Sound toggle (checkbox) controls a short chime when the popup appears:
+  - Cross-platform bell via Tk
+  - macOS: also play a brief system sound (e.g., Glass)
+  - Windows: use winsound.MessageBeep
+
+5) Attention cues and unread badge
+- Maintain an unread alert count that increments on popup open and decrements on close.
+- macOS: if PyObjC is available, set Dock badge to the unread count; otherwise fall back to app title suffix "[N]".
+- Windows: flash the taskbar icon (FlashWindowEx) while a popup is open; remove flash when dismissed. Also show unread count in the title suffix "[N]".
+
+6) Dialogs and actions
+- Detail dialog on double-click or via Setup Notifications supports checkboxes:
+  - "Notify 1 day before at 8:00 AM"
+  - "Notify same day at 8:00 AM"
+- Save Choices writes ONLY IPOs with notifications enabled to ipo_choices.json (with ISO timestamps for parsed trade datetime). Load Choices re-applies flags and attempts to re-schedule.
+- Remove Selected: delete scheduled entries for selected IPOs and clear their notify flags. Remove All: clear all scheduled entries and disable all notify flags.
+- Instructions: scrollable popup describing how to use the app.
+- Test Notify Now: triggers the same in-app popup instantly.
+
+7) Sorting/filtering
+- Clickable header sort for all columns except the bell column. Search box filters rows across combined text. Category filter limits rows to the selected category.
+
+8) Persistence and locations
+- Store JSON files in platform-appropriate app data directories:
+  - macOS: ~/Library/Application Support/IPO Tracker/
+  - Windows: %APPDATA%\IPO Tracker\
+- Files: ipo_notifications.json (scheduled) and ipo_choices.json (saved selections). They are created at runtime; do not bundle them.
+
+9) Error handling, resilience, and constraints
+- No crashes on malformed or missing rows. If parsing fails, skip or fallback safely.
+- If BeautifulSoup is missing, show a clear message that parsing requires bs4.
+- No nltk. Stick to Tkinter for UI.
+- Keep everything in a single Python file (ipo.py).
+
+10) Quality targets
+- Clean, readable classes: IPO (data+date parsing), NotificationScheduler (JSON persistence, minute loop, in-app notify callback), NotificationDialog (checkboxes), and main Tk app class.
+- Make behavior identical on macOS and Windows wherever possible, with platform-specific enhancements guarded (PyObjC on macOS for Dock badge; FlashWindowEx on Windows for taskbar flashing).
+
+Deliverable:
+- A single Python file ipo.py implementing all features above. The app must run via:
+  - macOS/Windows: `python ipo.py` (or `python3 ipo.py`)
+- It should be ready for packaging with PyInstaller using a platform icon (icns/ico).

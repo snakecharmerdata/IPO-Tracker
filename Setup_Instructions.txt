@@ -1,0 +1,96 @@
+IPO Tracker — Student Setup and Build (macOS and Windows, no conda)
+
+Part A — Prepare the Project Folder (Both Platforms)
+1) Create a folder for the project, for example on the Desktop:
+   - macOS:   mkdir -p ~/Desktop/IPOTracker
+   - Windows: Create a folder named IPOTracker on your Desktop
+
+2) Put the required files in that folder:
+   - ipo.py (main app file)
+   - Optional icons:
+     - macOS: Forcompile.icns (app icon)
+     - Windows: Forcompile.ico (app icon)
+
+3) Files that are NOT required to be pre-created (the app creates them at runtime):
+   - ipo_notifications.json (scheduled reminders)
+   - ipo_choices.json (your saved selections)
+
+Part B — Create a Python Virtual Environment (No conda)
+macOS (Terminal)
+1) Change directory to the project folder:
+   cd ~/Desktop/IPOTracker
+2) Create a virtual environment and activate it:
+   python3 -m venv venv
+   source venv/bin/activate
+3) Upgrade pip and install dependencies:
+   pip install --upgrade pip
+   pip install requests beautifulsoup4 pyinstaller
+   # Optional (macOS Dock badge count)
+   pip install pyobjc
+
+Windows (Command Prompt or PowerShell)
+1) Change directory to the project folder:
+   cd %USERPROFILE%\Desktop\IPOTracker
+2) Create a virtual environment and activate it:
+   python -m venv venv
+   # Command Prompt:
+   venv\Scripts\activate
+   # PowerShell:
+   venv\Scripts\Activate.ps1
+3) Upgrade pip and install dependencies:
+   pip install --upgrade pip
+   pip install requests beautifulsoup4 pyinstaller
+   # (No extra package needed for Windows features)
+
+Part C — Test Run Without Packaging
+1) From the same terminal with the venv activated:
+   - macOS:   python3 ipo.py
+   - Windows: python ipo.py
+2) In the app, click “Test Notify Now” to verify the in-app popup. Use the “Sound” checkbox to toggle chime.
+3) Close the app when done testing.
+
+Part D — Build an Executable
+macOS (.app)
+1) Ensure you have Forcompile.icns in the project folder. If not, you can build without an icon by omitting --icon.
+2) Build with PyInstaller:
+   pyinstaller --clean --noconfirm --onefile --windowed --name "IPO Tracker" --icon Forcompile.icns ipo.py
+3) Open the generated .app:
+   open "dist/IPO Tracker.app"
+4) If macOS blocks the app (Gatekeeper):
+   xattr -dr com.apple.quarantine "dist/IPO Tracker.app"
+   open "dist/IPO Tracker.app"
+5) Optional: copy to Desktop for one-click launch:
+   cp -R "dist/IPO Tracker.app" ~/Desktop/
+
+Windows (.exe)
+1) Ensure you have Forcompile.ico in the project folder. If you only have a JPG/PNG, convert it to .ico (requires ImageMagick):
+   magick Forcompile.jpeg -resize 1024x1024 -define icon:auto-resize=256,128,64,48,32,16 Forcompile.ico
+2) Build with PyInstaller:
+   pyinstaller --clean --noconfirm --onefile --windowed --name "IPO Tracker" --icon Forcompile.ico ipo.py
+3) Open the generated .exe:
+   start "" "dist/IPO Tracker.exe"
+4) Optional: copy to Desktop for one-click launch:
+   copy "dist\IPO Tracker.exe" "%USERPROFILE%\Desktop\"
+5) If Windows SmartScreen warns (unsigned app): click “More info” -> “Run anyway”.
+
+Part E — Where the App Stores Data
+The app saves data files automatically in a standard user data folder:
+- macOS:   ~/Library/Application Support/IPO Tracker/
+- Windows: %APPDATA%\IPO Tracker\
+Files created at runtime:
+- ipo_notifications.json (scheduled notifications)
+- ipo_choices.json (saved selections)
+
+Part F — Notes & Troubleshooting
+1) Tkinter must be installed with Python. Most standard Python installs include it.
+2) If you see ModuleNotFoundError for requests or bs4:
+   pip install requests beautifulsoup4
+3) If the .icns/.ico icon isn’t used:
+   - Make sure the file exists and the --icon path/filename is correct.
+4) macOS Dock badge count (unread alerts) requires PyObjC. If not installed, the window title will show [N] instead.
+5) Windows taskbar flashes the icon when a popup appears; sound uses winsound.
+6) The app must be running for scheduled popups to appear (scheduler checks every minute).
+
+Part G — Deactivate the Virtual Environment (when done)
+- macOS/Windows:
+  deactivate
