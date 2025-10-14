@@ -294,8 +294,14 @@ def ensure_webview_available() -> bool:
     global HAS_WEBVIEW, HtmlFrame
     if HAS_WEBVIEW:
         return True
+
+    import sys
+    # If running as a bundled executable (frozen), do not attempt to install packages.
+    # The 'sys.frozen' attribute is set by tools like PyInstaller.
+    if getattr(sys, 'frozen', False):
+        return False
+
     try:
-        import sys
         import subprocess as _sub
         _sub.run([sys.executable, "-m", "pip", "install", "--quiet", "tkinterweb"], check=False)
         from tkinterweb import HtmlFrame as _HtmlFrame  # type: ignore
