@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# This script builds a macOS application bundle (.app) from the ipo3.py script.
+#
+# Prerequisites:
+# 1. This script should be in the same directory as ipo3.py.
+# 2. The virtual environment 'IPOTracker_env' should exist.
+#
+# Instructions:
+# 1. Save this entire content as a file named 'build.sh'.
+# 2. Make the script executable by running: chmod +x build.sh
+# 3. (Optional but Recommended) Create an icon for the app:
+#    - Find or create a square PNG image (e.g., 1024x1024 pixels) and save it as 'icon.png'.
+#    - Convert it to a macOS icon file (.icns) by running the following commands in your terminal:
+#      mkdir -p icon.iconset
+#      sips -z 16 16     icon.png --out icon.iconset/icon_16x16.png
+#      sips -z 32 32     icon.png --out icon.iconset/icon_32x32.png
+#      sips -z 64 64     icon.png --out icon.iconset/icon_64x64.png
+#      sips -z 128 128   icon.png --out icon.iconset/icon_128x128.png
+#      sips -z 256 256   icon.png --out icon.iconset/icon_256x256.png
+#      sips -z 512 512   icon.png --out icon.iconset/icon_512x512.png
+#      sips -z 1024 1024 icon.png --out icon.iconset/icon_1024x1024.png
+#      iconutil -c icns icon.iconset -o icon.icns
+#      rm -rf icon.iconset
+#    - Make sure the final 'icon.icns' file is in this directory. If not, pyinstaller will use a default icon.
+# 4. Run the script: ./build.sh
+# 5. The final application will be located at 'dist/IPOTracker.app'. You can drag this to your Applications folder.
+#
+
+set -e
+
+# --- Configuration ---
+VENV_PATH="IPOTracker_env"
+SCRIPT_NAME="ipo3.py"
+APP_NAME="IPOTracker"
+ICON_FILE="icon.icns"
+
+# --- Script ---
+
+# Activate virtual environment to use its python and pip
+source "$VENV_PATH/bin/activate"
+
+echo "--- Ensuring pyinstaller is installed ---"
+pip install --quiet pyinstaller
+
+echo "--- Building the application (this may take a few minutes) ---"
+
+# Check if the icon file exists
+if [ -f "$ICON_FILE" ]; then
+    echo "Icon file found: $ICON_FILE"
+    ICON_ARG="--icon=$ICON_FILE"
+else
+    echo "Warning: Icon file '$ICON_FILE' not found. Using default icon."
+    ICON_ARG=""
+fi
+
+# Run pyinstaller
+pyinstaller \
+    --name "$APP_NAME" \
+    --onefile \
+    --windowed \
+    $ICON_ARG \
+    "$SCRIPT_NAME"
+
+echo "--- Build complete! ---"
+echo "The application bundle can be found at: dist/$APP_NAME.app"
+echo "You can now run the app by double-clicking it or by running: open dist/$APP_NAME.app"
+
+# Deactivate the virtual environment
+deactivate
