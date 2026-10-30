@@ -289,17 +289,25 @@ except Exception:
     HAS_WEBVIEW = False
     HtmlFrame = None  # type: ignore
 
+_WEBVIEW_INSTALL_TRIED = False
+
 def ensure_webview_available() -> bool:
     """Attempt to ensure tkinterweb is available. Returns True if usable."""
-    global HAS_WEBVIEW, HtmlFrame
+    global HAS_WEBVIEW, HtmlFrame, _WEBVIEW_INSTALL_TRIED
     if HAS_WEBVIEW:
         return True
 
     import sys
     # If running as a bundled executable (frozen), do not attempt to install packages.
-    # The 'sys.frozen' attribute is set by tools like PyInstaller.
+    # In a PyInstaller app, sys.executable is the app itself, so running
+    # "sys.executable -m pip" would launch a second copy of the app.
     if getattr(sys, 'frozen', False):
         return False
+
+    # Only try the pip install once per session.
+    if _WEBVIEW_INSTALL_TRIED:
+        return False
+    _WEBVIEW_INSTALL_TRIED = True
 
     try:
         import subprocess as _sub
